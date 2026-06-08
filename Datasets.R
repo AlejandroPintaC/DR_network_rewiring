@@ -144,3 +144,34 @@ ggplot(pca_periphery_df, aes(x = PC1, y = PC2, color = disease_group)) +
   theme_bw() +
   labs(title = "PCA - Periphery")
 dev.off()
+
+#Identificacion del ouline en la periferia
+which(pca_periphery$x[, 1] > 150)
+
+metadata["sample_78", c("disease_group:ch1", "sample_site:ch1", "rin:ch1", "age:ch1", "comorbidities:ch1")] # Esto para verficar que muestra es y a que grupo pertenece
+
+metadata["sample_78", c("disease_group:ch1", "rin:ch1", "age:ch1", "post_mortem_interval:ch1")] # Ver resto de metadatos
+
+# Excluir outlier de periferia
+periphery_samples_clean <- periphery_samples[periphery_samples != "sample_78"]
+expr_periphery_clean <- expr_data[, periphery_samples_clean]
+metadata_periphery_clean <- metadata[periphery_samples_clean, ]
+
+# Verificar
+dim(expr_periphery_clean)
+table(metadata_periphery_clean$`disease_group:ch1`)
+pca_periphery_clean <- prcomp(t(expr_periphery_clean), scale. = TRUE)
+
+#PCA rapido de periferia limpia para confirmar que el outlier ya no esta
+pca_periphery_clean_df <- data.frame(
+  PC1 = pca_periphery_clean$x[, 1],
+  PC2 = pca_periphery_clean$x[, 2],
+  disease_group = metadata_periphery_clean$`disease_group:ch1`
+)
+
+png(file.path(img_dir, "PCA_periphery_clean.png"), width = 800, height = 600)
+ggplot(pca_periphery_clean_df, aes(x = PC1, y = PC2, color = disease_group)) +
+  geom_point(size = 3) +
+  theme_bw() +
+  labs(title = "PCA - Periphery (clean)")
+dev.off()
