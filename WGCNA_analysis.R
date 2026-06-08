@@ -7,6 +7,7 @@ library(ggplot2)
 # Configuración recomendada para WGCNA
 options(stringsAsFactors = FALSE)
 enableWGCNAThreads()
+disableWGCNAThreads()
 # Carga de datos
 load("GSE160306_processed.RData")
 ls()
@@ -30,7 +31,6 @@ sft_macula <- pickSoftThreshold(t(expr_macula),
                                 verbose = 5,
                                 networkType = "signed")
 
-disableWGCNAThreads()
 
 #Tenemos que verificar que el slope sea negativo (red scale-free)
 png(file.path(img_dir, "soft_threshold_macula.png"), width = 900, height = 500)
@@ -60,13 +60,7 @@ text(sft_macula$fitIndices[,1],
      labels = powers, col = "red")
 dev.off()
 # Ahora STP para periferia
-sft_periphery <- pickSoftThreshold(t(expr_periphery_clean), 
-                                   powerVector = powers,
-                                   verbose = 5,
-                                   networkType = "signed")
-
 powers2 <- c(1:30)
-
 sft_periphery2 <- pickSoftThreshold(t(expr_periphery_clean), 
                                     powerVector = powers2,
                                     verbose = 5,
@@ -101,3 +95,8 @@ save(expr_macula, expr_periphery_clean,
      periphery_samples_clean, macula_samples,
      sft_macula, sft_periphery2,
      file = "GSE160306_processed.RData")
+
+# Poderes seleccionados:
+# Macula: power = 10 (R^2 = 0.903, mean connectivity = 154)
+# Periferia: power = 18 (R^2 = 0.887, mean connectivity = 12.2)
+# Nota: para periferia se usó umbral R^2 >= 0.85 por n < 50
