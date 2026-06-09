@@ -99,3 +99,63 @@ hub_genes_periphery <- hub_genes_periphery[order(hub_genes_periphery$Module,
 do.call(rbind, lapply(modules_sig_periphery, function(mod){
   head(hub_genes_periphery[hub_genes_periphery$Module == mod, ], 5)
 }))
+
+# KEGG pathway enrichment de los módulos significativos de Macula
+modules_sig_macula <- c("green", "purple", "tan", "salmon")
+
+for(mod in modules_sig_macula){
+  genes <- names(net_macula$colors[net_macula$colors == mod])
+  entrez <- bitr(genes, fromType = "ENSEMBL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  
+  kegg_result <- enrichKEGG(gene = entrez$ENTREZID,
+                            organism = "hsa",
+                            pAdjustMethod = "BH",
+                            pvalueCutoff = 0.05)
+  
+  if(!is.null(kegg_result) && nrow(kegg_result) > 0){
+    png(file.path(img_dir, paste0("KEGG_", mod, "_macula.png")), width = 900, height = 700)
+    print(dotplot(kegg_result, showCategory = 15,
+                  title = paste0("KEGG - ME", mod, " Macula")))
+    dev.off()
+  }
+  
+  assign(paste0("kegg_", mod, "_macula"), kegg_result)
+}
+
+# KEGG pathway enrichment de los  módulos significativos de Periferia
+modules_sig_periphery <- c("turquoise", "grey60", "saddlebrown")
+
+for(mod in modules_sig_periphery){
+  genes <- names(net_periphery$colors[net_periphery$colors == mod])
+  entrez <- bitr(genes, fromType = "ENSEMBL", toType = "ENTREZID", OrgDb = org.Hs.eg.db)
+  
+  kegg_result <- enrichKEGG(gene = entrez$ENTREZID,
+                            organism = "hsa",
+                            pAdjustMethod = "BH",
+                            pvalueCutoff = 0.05)
+  
+  if(!is.null(kegg_result) && nrow(kegg_result) > 0){
+    png(file.path(img_dir, paste0("KEGG_", mod, "_periphery.png")), width = 900, height = 700)
+    print(dotplot(kegg_result, showCategory = 15,
+                  title = paste0("KEGG - ME", mod, " Periphery")))
+    dev.off()
+  }
+  
+  assign(paste0("kegg_", mod, "_periphery"), kegg_result)
+}
+
+save(expr_macula, expr_periphery_clean,
+     metadata, metadata_periphery_clean,
+     periphery_samples_clean, macula_samples,
+     sft_macula, sft_periphery2,
+     net_macula, net_periphery,
+     MEsmacula, MEsperiphery,
+     module_trait_cor_macula, module_trait_pval_macula,
+     module_trait_cor_periphery, module_trait_pval_periphery,
+     go_green, go_purple_macula, go_tan_macula, go_salmon_macula,
+     go_turquoise_periphery, go_grey60_periphery, go_saddlebrown_periphery,
+     kegg_green_macula, kegg_purple_macula, kegg_tan_macula, kegg_salmon_macula,
+     kegg_turquoise_periphery, kegg_grey60_periphery, kegg_saddlebrown_periphery,
+     kME_macula, kME_periphery,
+     hub_genes_macula, hub_genes_periphery,
+     file = "GSE160306_processed.RData")
