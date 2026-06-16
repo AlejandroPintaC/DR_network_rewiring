@@ -99,4 +99,3 @@ save(expr_macula, expr_periphery_clean,
 # Poderes seleccionados:
 # Macula: power = 10 (R^2 = 0.903, mean connectivity = 154)
 # Periferia: power = 18 (R^2 = 0.887, mean connectivity = 12.2)
-# Nota: para periferia se usó umbral R^2 >= 0.85 por n < 50
