@@ -1,5 +1,5 @@
 
-pacman::p_load("WGCNA", "ggplot2", "igraph", "aricode", "clusterProfiler", "org.Hs.eg.db", "reshape2")
+pacman::p_load("WGCNA", "ggplot2", "igraph", "aricode", "clusterProfiler", "org.Hs.eg.db", "reshape2", "gplots")
 
 options(stringsAsFactors = FALSE)
 disableWGCNAThreads()
@@ -87,6 +87,8 @@ net_periphery_control <- blockwiseModules(
 )
 
 table(net_periphery_control$colors)
+
+
 
 # Tenemos que comparar las particiones de módulos control de macula y periferia
 
@@ -225,4 +227,67 @@ save(expr_macula, expr_periphery_clean,
      go_macula_control, go_periphery_control,
      similarity_matrix, similarity_long,
      file = "GSE160306_processed.RData")
+
+# Gráfica de soft thresholding power (Periferia Control)
+
+png(file.path(img_dir, "soft_threshold_periphery_control.png"), width = 900, height = 500)
+par(mfrow = c(1,2))
+
+plot(sft_periphery_control$fitIndices[,1], 
+     -sign(sft_periphery_control$fitIndices[,3])*sft_periphery_control$fitIndices[,2],
+     xlab = "Soft Threshold (power)",
+     ylab = "Scale Free Topology Model Fit (R^2)",
+     main = "Scale independence - Periphery Control",
+     type = "n")
+text(sft_periphery_control$fitIndices[,1], 
+     -sign(sft_periphery_control$fitIndices[,3])*sft_periphery_control$fitIndices[,2],
+     labels = powers_control, col = "red")
+abline(h = 0.85, col = "blue")
+abline(h = 0.80, col = "orange", lty = 2)
+
+plot(sft_periphery_control$fitIndices[,1], 
+     sft_periphery_control$fitIndices[,5],
+     xlab = "Soft Threshold (power)",
+     ylab = "Mean Connectivity",
+     main = "Mean connectivity - Periphery Control",
+     type = "n")
+text(sft_periphery_control$fitIndices[,1], 
+     sft_periphery_control$fitIndices[,5],
+     labels = powers_control, col = "red")
+dev.off()
+
+# Heatmap de la matriz de similitud funcional (Jaccard) módulo a módulo
+# Macula (filas) vs Periferia (columnas)
+png(file.path(img_dir, "functional_similarity_heatmap.png"), width = 1100, height = 800)
+heatmap.2(similarity_matrix,
+          col = colorRampPalette(c("white", "orange", "red"))(50),
+          trace = "none",
+          density.info = "none",
+          main = "Similitud funcional (Jaccard): Macula vs Periferia Control",
+          xlab = "Módulos Periferia",
+          ylab = "Módulos Macula",
+          margins = c(10, 10),
+          cexRow = 1.1,
+          cexCol = 1.1,
+          key.title = "Jaccard")
+dev.off()
+
+# Heatmap de similitud funcional (versión sin dendrograma)
+png(file.path(img_dir, "functional_similarity_heatmap_v2.png"), width = 1300, height = 950)
+heatmap.2(similarity_matrix,
+          col = colorRampPalette(c("white", "orange", "red"))(50),
+          trace = "none",
+          density.info = "none",
+          dendrogram = "none",   # para quitar los dendrogramas
+          Rowv = FALSE,          # mantiene orden original de filas
+          Colv = FALSE,          # mantiene orden original de columnas
+          main = "Similitud funcional (Jaccard): Macula vs Periferia Control",
+          xlab = "Módulos Periferia",
+          ylab = "Módulos Macula",
+          margins = c(12, 12),
+          cexRow = 1.1,
+          cexCol = 1.1,
+          key.title = "Jaccard")
+dev.off()
+
 
